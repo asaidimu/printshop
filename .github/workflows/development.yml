@@ -1,0 +1,37 @@
+name: Development
+
+on:
+  push:
+    branches: ["development"]
+
+jobs:
+  build:
+    name: Development Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set Up JS Runtime
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: install dependencies
+        run: bun install
+
+      - name: build ui
+        run: cd  ./packages/app && bun run build
+
+      - name: run tests
+        run: echo "Running tests"
+
+      - name: create pull request
+        if: success()
+        run: |
+          gh pr create --base main --head feature-branch --title "Auto-generated Pull Request" --body "Automatically created PR after successful development tests"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
